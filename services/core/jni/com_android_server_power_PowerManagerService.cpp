@@ -46,6 +46,7 @@
 #include <utils/misc.h>
 #include <utils/String8.h>
 #include <utils/Log.h>
+#include <android/keycodes.h>
 
 #include "com_android_server_power_PowerManagerService.h"
 
