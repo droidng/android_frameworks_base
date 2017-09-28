@@ -3615,6 +3615,10 @@ public class StatusBar extends SystemUI implements
         mKeyguardIndicationController.showTransientIndication(R.string.phone_hint);
     }
 
+    public void onCustomHintStarted() {
+        mKeyguardIndicationController.showTransientIndication(org.eu.droid_ng.platform.internal.R.string.custom_hint);
+    }
+
     public void onTrackingStopped(boolean expand) {
         if (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED) {
             if (!expand && !mKeyguardStateController.canDismissLockScreen()) {
