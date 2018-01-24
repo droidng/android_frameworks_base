@@ -16,7 +16,7 @@
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:sysui="http://schemas.android.com/apk/res-auto"
-    android:title="@string/systemui_tuner_navbar_title">
+    android:title="@*org.eu.droid_ng.platform:string/systemui_tuner_navbar_title">
 
     <ListPreference
         android:key="layout"
@@ -25,5 +25,11 @@
         android:persistent="false"
         android:entries="@array/nav_bar_layouts"
         android:entryValues="@array/nav_bar_layouts_values" />
+
+    <Preference
+        android:key="navbar_editor"
+        android:title="@*org.eu.droid_ng.platform:string/navbar_editor_title"
+        android:summary="@*org.eu.droid_ng.platform:string/navbar_editor_summary"
+        android:fragment="com.android.systemui.tuner.NavBarEditor" />
 
 </PreferenceScreen>
