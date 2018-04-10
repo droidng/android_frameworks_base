@@ -917,6 +917,11 @@ final class DefaultPermissionGrantPolicy {
                 getDefaultProviderAuthorityPackage("com.google.android.flipendo", userId),
                 userId, SUSPEND_APP_PERMISSIONS);
 
+        // Google Wallpapers
+        grantSystemFixedPermissionsToSystemPackage(pm,"com.google.android.apps.wallpaper", userId, STORAGE_PERMISSIONS);
+
+        // Pixel Live Wallpapers
+        grantSystemFixedPermissionsToSystemPackage(pm,"com.google.pixel.livewallpaper", userId, ALWAYS_LOCATION_PERMISSIONS);
     }
 
     private String getDefaultSystemHandlerActivityPackageForCategory(PackageManagerWrapper pm,
