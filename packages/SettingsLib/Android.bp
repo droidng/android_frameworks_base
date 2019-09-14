@@ -25,7 +25,7 @@ android_library {
     // ANDROIDMK TRANSLATION ERROR: unsupported assignment to LOCAL_SHARED_JAVA_LIBRARIES
     // LOCAL_SHARED_JAVA_LIBRARIES := androidx.lifecycle_lifecycle-common
 
-    resource_dirs: ["res"],
+    resource_dirs: ["res", "res-mat"],
 
     srcs: [
         "src/**/*.java",

@@ -14,11 +14,6 @@
      limitations under the License.
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- Face Unlock -->
-    <string name="face_unlock_recognizing">Recognizing face...</string>
-
-    <!-- Navbar -->
-    <string name="systemui_tuner_navbar_title">Layout</string>
-    <string name="navigation_bar_format_title">Navbar format</string>
-
+    <!-- Deep sleep info -->
+    <string name="status_deep_sleep">(Deep sleep: %1$d%2$s)</string>
 </resources>
