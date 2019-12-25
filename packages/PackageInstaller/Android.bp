@@ -46,4 +46,9 @@ android_app {
         "xz-java",
         "androidx.leanback_leanback",
     ],
+
+    resource_dirs: [
+         "res",
+	 "res-mat",
+    ],
 }
