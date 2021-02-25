@@ -373,7 +373,7 @@ public class BrightnessController implements ToggleSlider.Listener, MirroredBrig
     }
 
     public void checkRestrictionAndSetEnabled() {
-        mBackgroundHandler.post(new Runnable() {
+        mHandler.post(new Runnable() {
             @Override
             public void run() {
                 mControl.setEnforcedAdmin(
