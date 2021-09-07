@@ -16,6 +16,9 @@
 
 package com.android.internal.util.custom;
 
+import static android.view.DisplayCutout.BOUNDS_POSITION_LEFT;
+import static android.view.DisplayCutout.BOUNDS_POSITION_RIGHT;
+
 import android.Manifest;
 import android.app.ActivityManager;
 import android.app.NotificationManager;
@@ -25,6 +28,8 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.graphics.Point;
+import android.graphics.Rect;
 import android.hardware.input.InputManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Handler;
@@ -42,6 +47,11 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Vibrator;
+import android.text.TextUtils;
+import android.util.DisplayMetrics;
+import android.util.Log;
+import android.view.DisplayCutout;
+import android.view.DisplayInfo;
 import android.view.InputDevice;
 import android.view.IWindowManager;
 import android.view.KeyCharacterMap;
@@ -54,6 +64,10 @@ import com.android.internal.statusbar.IStatusBarService;
 import java.util.List;
 
 public class Utils {
+
+    private static final String TAG = "Utils";
+    private static final boolean DEBUG = false;
+    private static final int NO_CUTOUT = -1;
 
     public static final String INTENT_SCREENSHOT = "action_take_screenshot";
     public static final String INTENT_REGION_SCREENSHOT = "action_take_region_screenshot";
@@ -333,5 +347,31 @@ public class Utils {
         SensorManager sm = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
         return sm.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null
                 && sm.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD) != null;
+    }
+    public static int getCutoutType(Context context) {
+        final DisplayInfo info = new DisplayInfo();
+        context.getDisplay().getDisplayInfo(info);
+        final DisplayCutout cutout = info.displayCutout;
+        if (cutout == null) {
+            if (DEBUG) Log.v(TAG, "noCutout");
+            return NO_CUTOUT;
+        }
+        final Point displaySize = new Point();
+        context.getDisplay().getRealSize(displaySize);
+        List<Rect> cutOutBounds = cutout.getBoundingRects();
+        if (cutOutBounds != null) {
+            for (Rect cutOutRect : cutOutBounds) {
+                if (DEBUG) Log.v(TAG, "cutout left= " + cutOutRect.left);
+                if (DEBUG) Log.v(TAG, "cutout right= " + cutOutRect.right);
+                if (cutOutRect.left == 0 && cutOutRect.right > 0) {  //cutout is located on top left
+                    if (DEBUG) Log.v(TAG, "cutout position= " + BOUNDS_POSITION_LEFT);
+                    return BOUNDS_POSITION_LEFT;
+                } else if (cutOutRect.right == displaySize.x && (displaySize.x - cutOutRect.left) > 0) {  //cutout is located on top right
+                    if (DEBUG) Log.v(TAG, "cutout position= " + BOUNDS_POSITION_RIGHT);
+                    return BOUNDS_POSITION_RIGHT;
+                }
+            }
+        }
+        return NO_CUTOUT;
     }
 }
