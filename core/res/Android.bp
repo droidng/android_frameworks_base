@@ -110,6 +110,11 @@ android_app {
 
     srcs: [":remote-color-resources-arsc"],
 
+    resource_dirs: [
+        "res",
+        "remote_ng_resources_res",
+    ],
+
     // Disable dexpreopt and verify_uses_libraries check as the app
     // contains no Java code to be dexpreopted.
     enforce_uses_libs: false,
