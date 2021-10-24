@@ -47,6 +47,7 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Vibrator;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -373,5 +374,14 @@ public class Utils {
             }
         }
         return NO_CUTOUT;
+    }
+
+    /**
+     * Returns whether the device is voice-capable (meaning, it is also a phone).
+     */
+    public static boolean isVoiceCapable(Context context) {
+        TelephonyManager telephony =
+                (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+        return telephony != null && telephony.isVoiceCapable();
     }
 }
