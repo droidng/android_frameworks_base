@@ -28,4 +28,8 @@
     <string name="screenshot_delete_description">Delete screenshot</string>
 
     <dimen name="fps_info_text_padding">4dp</dimen>
+
+    <!-- Screenshot drawables -->
+    <dimen name="screenshot_border_corner_radius">24dp</dimen>
+    <dimen name="screenshot_preview_corner_radius">20dp</dimen>
 </resources>
