@@ -67,6 +67,11 @@ LOCAL_REQUIRED_MODULES := \
         IconPackOutlineAndroidOverlay \
         IconPackOutlineSettingsOverlay \
         IconPackOutlineSystemUIOverlay \
+        IconPackPUIAndroidOverlay \
+        IconPackPUILauncherOverlay \
+        IconPackPUISettingsOverlay \
+        IconPackPUISystemUIOverlay \
+        IconPackPUIThemePickerOverlay \
 	NavigationBarMode3ButtonOverlay \
 	NavigationBarMode2ButtonOverlay \
 	NavigationBarModeGesturalOverlay \
