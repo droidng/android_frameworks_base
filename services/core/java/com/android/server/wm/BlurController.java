@@ -28,6 +28,7 @@ import android.net.ConnectivityManager;
 import android.os.PowerManager;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.provider.Settings;
 import android.view.ICrossWindowBlurEnabledListener;
 import android.view.TunnelModeEnabledListener;
@@ -145,6 +146,6 @@ final class BlurController {
 
     private boolean getBlurDisabledSetting() {
         return Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.DISABLE_WINDOW_BLURS, 0) == 1;
+                Settings.Global.DISABLE_WINDOW_BLURS, SystemProperties.getInt("persist.sys.sf.disable_blurs", 0)) == 1;
     }
 }
