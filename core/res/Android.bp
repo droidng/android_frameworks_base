@@ -146,6 +146,11 @@ android_app {
             "simulated_device_launcher",
         ],
     },
+
+    resource_dirs: [
+         "res",
+         "res-mat",
+    ],
 }
 
 java_genrule {
