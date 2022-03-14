@@ -75,6 +75,7 @@ import com.android.systemui.R;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -120,6 +121,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private KeyguardMessageAreaController mKeyguardMessageAreaController;
     private final Lazy<ShadeController> mShadeController;
     private boolean mBouncerVisible = false;
+    private final Lazy<Optional<StatusBar>> mStatusBarOptionalLazy;
     private final BouncerExpansionCallback mExpansionCallback = new BouncerExpansionCallback() {
         @Override
         public void onFullyShown() {
@@ -273,6 +275,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
             KeyguardMessageAreaController.Factory keyguardMessageAreaFactory,
             Lazy<ShadeController> shadeController,
+            Lazy<Optional<StatusBar>> statusBarOptionalLazy,
             @Main Handler handler,
             @Main Handler faceRecognizingHandler) {
         mContext = context;
@@ -291,6 +294,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
         mKeyguardMessageAreaFactory = keyguardMessageAreaFactory;
         mShadeController = shadeController;
+        mStatusBarOptionalLazy = statusBarOptionalLazy;
         mHandler = handler;
         mFaceRecognizingHandler = faceRecognizingHandler;
     }
@@ -710,6 +714,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             mMediaManager.updateMediaMetaData(false, animate && !occluded);
         }
         mNotificationShadeWindowController.setKeyguardOccluded(occluded);
+        mStatusBarOptionalLazy.get().map(StatusBar::getVisualizerView).ifPresent(
+                v -> v.setOccluded(occluded));
 
         // setDozing(false) will call reset once we stop dozing.
         if (!mDozing) {
