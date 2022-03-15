@@ -319,5 +319,7 @@ public class SecureSettingsValidators {
         });
         VALIDATORS.put(Secure.VOLUME_LINK_NOTIFICATION, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.FACE_UNLOCK_METHOD, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Secure.POWER_MENU_TYPE,
+                new DiscreteValueValidator(new String[] {"0", "1"}));
     }
 }

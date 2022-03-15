@@ -807,6 +807,9 @@
     <!-- Amount to shift the layout when exiting/entering for controls activities -->
     <dimen name="global_actions_controls_y_translation">20dp</dimen>
 
+    <!-- Shift quick access wallet down in Global Actions when Controls are unavailable -->
+    <dimen name="global_actions_wallet_top_margin">40dp</dimen>
+
     <!-- Shutdown and restart actions are larger in power options dialog -->
     <dimen name="global_actions_power_dialog_item_height">128dp</dimen>
     <dimen name="global_actions_power_dialog_item_width">128dp</dimen>

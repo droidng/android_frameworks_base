@@ -208,7 +208,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
     private final IActivityManager mIActivityManager;
     private final TelecomManager mTelecomManager;
     private final MetricsLogger mMetricsLogger;
-    private final UiEventLogger mUiEventLogger;
+    protected final UiEventLogger mUiEventLogger;
     private final SysUiState mSysUiState;
     private final LineageGlobalActions mLineageGlobalActions;
 
@@ -241,7 +241,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
     // Power menu customizations
     private String[] mActions;
 
-    private boolean mKeyguardShowing = false;
+    protected boolean mKeyguardShowing = false;
     private boolean mDeviceProvisioned = false;
     private ToggleState mAirplaneState = ToggleState.Off;
     private boolean mIsWaitingForEcmExit = false;
@@ -259,9 +259,9 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
     private int mDialogPressDelay = DIALOG_PRESS_DELAY; // ms
     protected Handler mMainHandler;
     private int mSmallestScreenWidthDp;
-    private final Optional<StatusBar> mStatusBarOptional;
-    private final SystemUIDialogManager mDialogManager;
-    private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    protected final Optional<StatusBar> mStatusBarOptional;
+    protected final SystemUIDialogManager mDialogManager;
+    protected final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final DialogLaunchAnimator mDialogLaunchAnimator;
     private final ControlsComponent mControlsComponent;
 
@@ -464,6 +464,11 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
 
     protected KeyguardUpdateMonitor getKeyguardUpdateMonitor() {
         return mKeyguardUpdateMonitor;
+    }
+
+    public void showOrHideDialog(boolean keyguardShowing, boolean isDeviceProvisioned,
+            @Nullable View v, GlobalActionsPanelPlugin walletPlugin) {
+        showOrHideDialog(keyguardShowing, isDeviceProvisioned, v);
     }
 
     /**

@@ -9745,12 +9745,9 @@ public final class Settings {
          * 0 indicates disabled and 1 indicates enabled. A non existent value should be treated as
          * enabled.
          *
-         * @deprecated Controls are migrated to Quick Settings, rendering this unnecessary and will
-         *             be removed in a future release.
          * @hide
          */
         @Readable
-        @Deprecated
         public static final String CONTROLS_ENABLED = "controls_enabled";
 
         /**
@@ -10278,6 +10275,15 @@ public final class Settings {
          * @hide
          */
         public static final String VOLUME_LINK_NOTIFICATION = "volume_link_notification";
+	
+        /**
+         * Int value specifying the power menu type (default is 0)
+         * 0 - Lite
+         * 1 - Full
+         * @hide
+         */
+        public static final String POWER_MENU_TYPE = "power_menu_type";
+
 
         /**
          * Keys we no longer back up under the current schema, but want to continue to

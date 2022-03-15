@@ -63,7 +63,7 @@ class ControlActionCoordinatorImpl @Inject constructor(
     private var actionsInProgress = mutableSetOf<String>()
     private val isLocked: Boolean
         get() = !keyguardStateController.isUnlocked()
-    override lateinit var activityContext: Context
+    override var activityContext: Context? = null
 
     companion object {
         private const val RESPONSE_TIMEOUT_IN_MILLIS = 3000L

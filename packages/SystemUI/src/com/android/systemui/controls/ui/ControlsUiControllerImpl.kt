@@ -128,7 +128,10 @@ class ControlsUiControllerImpl @Inject constructor (
             reload(parent)
     }
 
-    private lateinit var activityContext: Context
+    override val available: Boolean
+        get() = controlsController.get().available
+
+    private var activityContext: Context? = null
     private lateinit var listingCallback: ControlsListingController.ControlsListingCallback
 
     private fun createCallback(
@@ -153,7 +156,7 @@ class ControlsUiControllerImpl @Inject constructor (
     override fun show(
         parent: ViewGroup,
         onDismiss: Runnable,
-        activityContext: Context
+        activityContext: Context?
     ) {
         Log.d(ControlsUiController.TAG, "show()")
         this.parent = parent
@@ -230,7 +233,7 @@ class ControlsUiControllerImpl @Inject constructor (
     }
 
     private fun startTargetedActivity(si: StructureInfo, klazz: Class<*>) {
-        val i = Intent(activityContext, klazz)
+        val i = Intent(context, klazz)
         putIntentExtras(i, si)
         startActivity(i)
 
@@ -247,7 +250,7 @@ class ControlsUiControllerImpl @Inject constructor (
     }
 
     private fun startProviderSelectorActivity() {
-        val i = Intent(activityContext, ControlsProviderSelectorActivity::class.java)
+        val i = Intent(context, ControlsProviderSelectorActivity::class.java)
         i.putExtra(ControlsProviderSelectorActivity.BACK_SHOULD_EXIT, true)
         startActivity(i)
     }
@@ -258,10 +261,18 @@ class ControlsUiControllerImpl @Inject constructor (
 
         if (keyguardStateController.isShowing()) {
             activityStarter.postStartActivityDismissingKeyguard(intent, 0 /* delay */)
-        } else {
-            activityContext.startActivity(
+        } else if (activityContext != null) {
+            activityContext!!.startActivity(
                 intent,
                 ActivityOptions.makeSceneTransitionAnimation(activityContext as Activity).toBundle()
+            )
+        } else {
+            intent.apply {
+	        addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            intent.putExtra(ControlsUiController.BACK_TO_GLOBAL_ACTIONS, true)
+            context.startActivity(
+                intent
             )
         }
     }
@@ -308,6 +319,7 @@ class ControlsUiControllerImpl @Inject constructor (
                             pos: Int,
                             id: Long
                         ) {
+                            if (activityContext == null) /* in global actions menu */ onDismiss.run()
                             when (pos) {
                                 // 0: Add Control
                                 0 -> startFavoritingActivity(selectedStructure)

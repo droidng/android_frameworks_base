@@ -22,6 +22,7 @@ import android.annotation.StringRes;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.PowerManager;
+import android.provider.Settings;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -31,12 +32,15 @@ import android.widget.TextView;
 
 import com.android.internal.R;
 import com.android.settingslib.Utils;
+import com.android.systemui.Dependency;
 import com.android.systemui.plugins.GlobalActions;
 import com.android.systemui.scrim.ScrimDrawable;
+import com.android.systemui.plugins.GlobalActionsPanelPlugin;
 import com.android.systemui.statusbar.BlurUtils;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.systemui.statusbar.policy.ExtensionController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import javax.inject.Inject;
@@ -46,43 +50,57 @@ import dagger.Lazy;
 public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks {
 
     private final Context mContext;
-    private final Lazy<GlobalActionsDialogLite> mGlobalActionsDialogLazy;
+    private final Lazy<GlobalActionsDialog> mGlobalActionsDialogLazy;
+    private final Lazy<GlobalActionsDialogLite> mGlobalActionsDialogLiteLazy;
     private final KeyguardStateController mKeyguardStateController;
     private final DeviceProvisionedController mDeviceProvisionedController;
+    private final ExtensionController.Extension<GlobalActionsPanelPlugin> mWalletPluginProvider;
     private final BlurUtils mBlurUtils;
     private final CommandQueue mCommandQueue;
-    private GlobalActionsDialogLite mGlobalActionsDialog;
     private boolean mDisabled;
+    private boolean fullDialog = true;
+    private boolean hadLite = false;
+    private boolean hadFull = false;
 
     @Inject
     public GlobalActionsImpl(Context context, CommandQueue commandQueue,
-            Lazy<GlobalActionsDialogLite> globalActionsDialogLazy, BlurUtils blurUtils,
+            Lazy<GlobalActionsDialog> globalActionsDialogLazy, Lazy<GlobalActionsDialogLite> globalActionsDialogLiteLazy, BlurUtils blurUtils,
             KeyguardStateController keyguardStateController,
             DeviceProvisionedController deviceProvisionedController) {
         mContext = context;
         mGlobalActionsDialogLazy = globalActionsDialogLazy;
+        mGlobalActionsDialogLiteLazy = globalActionsDialogLiteLazy;
         mKeyguardStateController = keyguardStateController;
         mDeviceProvisionedController = deviceProvisionedController;
         mCommandQueue = commandQueue;
         mBlurUtils = blurUtils;
         mCommandQueue.addCallback(this);
+        mWalletPluginProvider = Dependency.get(ExtensionController.class)
+                .newExtension(GlobalActionsPanelPlugin.class)
+                .withPlugin(GlobalActionsPanelPlugin.class)
+                .build();
     }
 
     @Override
     public void destroy() {
         mCommandQueue.removeCallback(this);
-        if (mGlobalActionsDialog != null) {
-            mGlobalActionsDialog.destroy();
-            mGlobalActionsDialog = null;
+        if (hadLite) {
+            mGlobalActionsDialogLiteLazy.get().destroy();
+        }
+        if (hadFull) {
+            mGlobalActionsDialogLazy.get().destroy();
         }
     }
 
     @Override
     public void showGlobalActions(GlobalActionsManager manager) {
         if (mDisabled) return;
-        mGlobalActionsDialog = mGlobalActionsDialogLazy.get();
+        fullDialog = Settings.Secure.getInt(mContext.getContentResolver(), Settings.Secure.POWER_MENU_TYPE, 0) == 1;
+        hadLite = hadLite || !fullDialog;
+        hadFull = hadFull || fullDialog;
+        GlobalActionsDialogLite mGlobalActionsDialog = (fullDialog ? mGlobalActionsDialogLazy : mGlobalActionsDialogLiteLazy).get();
         mGlobalActionsDialog.showOrHideDialog(mKeyguardStateController.isShowing(),
-                mDeviceProvisionedController.isDeviceProvisioned(), null /* view */);
+                mDeviceProvisionedController.isDeviceProvisioned(), null /* view */, mWalletPluginProvider.get());
     }
 
     @Override
@@ -197,8 +215,11 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks 
         final boolean disabled = (state2 & DISABLE2_GLOBAL_ACTIONS) != 0;
         if (displayId != mContext.getDisplayId() || disabled == mDisabled) return;
         mDisabled = disabled;
-        if (disabled && mGlobalActionsDialog != null) {
-            mGlobalActionsDialog.dismissDialog();
+        if (disabled && hadFull) {
+            mGlobalActionsDialogLazy.get().dismissDialog();
+        }
+        if (disabled && hadLite) {
+            mGlobalActionsDialogLiteLazy.get().dismissDialog();
         }
     }
 }
