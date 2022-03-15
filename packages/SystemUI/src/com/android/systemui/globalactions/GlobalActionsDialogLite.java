@@ -142,6 +142,7 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.EmergencyDialerConstants;
 import com.android.systemui.util.RingerModeTracker;
+import com.android.systemui.util.leak.RotationUtils;
 import com.android.systemui.util.settings.GlobalSettings;
 import com.android.systemui.util.settings.SecureSettings;
 
@@ -208,7 +209,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
     private final IActivityManager mIActivityManager;
     private final TelecomManager mTelecomManager;
     private final MetricsLogger mMetricsLogger;
-    private final UiEventLogger mUiEventLogger;
+    protected final UiEventLogger mUiEventLogger;
     private final SysUiState mSysUiState;
     private final LineageGlobalActions mLineageGlobalActions;
 
@@ -241,7 +242,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
     // Power menu customizations
     private String[] mActions;
 
-    private boolean mKeyguardShowing = false;
+    protected boolean mKeyguardShowing = false;
     private boolean mDeviceProvisioned = false;
     private ToggleState mAirplaneState = ToggleState.Off;
     private boolean mIsWaitingForEcmExit = false;
@@ -259,9 +260,9 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
     private int mDialogPressDelay = DIALOG_PRESS_DELAY; // ms
     protected Handler mMainHandler;
     private int mSmallestScreenWidthDp;
-    private final Optional<StatusBar> mStatusBarOptional;
-    private final SystemUIDialogManager mDialogManager;
-    private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    protected final Optional<StatusBar> mStatusBarOptional;
+    protected final SystemUIDialogManager mDialogManager;
+    protected final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final DialogLaunchAnimator mDialogLaunchAnimator;
     private final ControlsComponent mControlsComponent;
 
@@ -466,6 +467,11 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         return mKeyguardUpdateMonitor;
     }
 
+    public void showOrHideDialog(boolean keyguardShowing, boolean isDeviceProvisioned,
+            @Nullable View v, GlobalActionsPanelPlugin walletPlugin) {
+        showOrHideDialog(keyguardShowing, isDeviceProvisioned, v);
+    }
+
     /**
      * Show the global actions dialog (creating if necessary) or hide it if it's already showing.
      *
@@ -486,7 +492,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             mDialog.dismiss();
             mDialog = null;
         } else {
-            handleShow(view);
+            handleShow(shouldUseControlsLayout() ? view : null);
         }
     }
 
@@ -874,6 +880,34 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         }
     }
 
+    protected int getEmergencyTextColor(Context context, boolean shouldBeSeparated) {
+        if (shouldBeSeparated) {
+            return context.getResources().getColor(
+                        com.android.systemui.R.color.global_actions_alert_text);
+        }
+        return context.getResources().getColor(
+                com.android.systemui.R.color.global_actions_lite_text);
+    }
+
+    protected int getEmergencyIconColor(Context context, boolean shouldBeSeparated) {
+	if (shouldBeSeparated) {
+            return context.getResources().getColor(
+                        com.android.systemui.R.color.global_actions_alert_text);
+        }
+        return context.getResources().getColor(
+                 com.android.systemui.R.color.global_actions_lite_emergency_icon);
+    }
+
+    protected int getEmergencyBackgroundColor(Context context, boolean shouldBeSeparated) {
+        if (shouldBeSeparated) {
+            return context.getResources().getColor(
+                        com.android.systemui.R.color.global_actions_emergency_background);
+        }
+        return context.getResources().getColor(
+                com.android.systemui.R.color.global_actions_lite_emergency_background);
+    }
+
+
     @VisibleForTesting
     protected abstract class EmergencyAction extends SinglePressAction {
         EmergencyAction(int iconResId, int messageResId) {
@@ -882,7 +916,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
 
         @Override
         public boolean shouldBeSeparated() {
-            return false;
+            return !useGridLayout() && !shouldUseControlsLayout();
         }
 
         @Override
@@ -916,21 +950,19 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         public boolean shouldShow() {
             return mHasTelephony;
         }
-    }
+    
+	protected int getEmergencyTextColor(Context context) {
+            return GlobalActionsDialogLite.this.getEmergencyTextColor(context, shouldBeSeparated());
+        }
 
-    protected int getEmergencyTextColor(Context context) {
-        return context.getResources().getColor(
-                com.android.systemui.R.color.global_actions_lite_text);
-    }
+        protected int getEmergencyIconColor(Context context) {
+            return GlobalActionsDialogLite.this.getEmergencyIconColor(context, shouldBeSeparated());
+        }
 
-    protected int getEmergencyIconColor(Context context) {
-        return context.getResources().getColor(
-                com.android.systemui.R.color.global_actions_lite_emergency_icon);
-    }
+        protected int getEmergencyBackgroundColor(Context context) {
+            return GlobalActionsDialogLite.this.getEmergencyBackgroundColor(context, shouldBeSeparated());
+        }
 
-    protected int getEmergencyBackgroundColor(Context context) {
-        return context.getResources().getColor(
-                com.android.systemui.R.color.global_actions_lite_emergency_background);
     }
 
     private class EmergencyAffordanceAction extends EmergencyAction {
@@ -1692,7 +1724,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
                 Log.w(TAG, "No power options action found at position: " + position);
                 return null;
             }
-            int viewLayoutResource = com.android.systemui.R.layout.global_actions_grid_item_lite;
+            int viewLayoutResource = getGridItemLayoutResource();
             View view = convertView != null ? convertView
                     : LayoutInflater.from(mContext).inflate(viewLayoutResource, parent, false);
             view.setOnClickListener(v -> onClickItem(position));
@@ -2064,6 +2096,9 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
     }
 
     protected int getGridItemLayoutResource() {
+	if (!shouldUseControlsLayout()) {
+	    return com.android.systemui.R.layout.global_actions_grid_item;
+        }
         return com.android.systemui.R.layout.global_actions_grid_item_lite;
     }
 
@@ -2517,7 +2552,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
     }
 
     @VisibleForTesting
-    static class ActionsDialogLite extends SystemUIDialog implements DialogInterface,
+    class ActionsDialogLite extends SystemUIDialog implements DialogInterface,
             ColorExtractor.OnColorsChangedListener {
 
         protected final Context mContext;
@@ -2698,6 +2733,22 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         }
 
         protected int getLayoutResource() {
+	if (!shouldUseControlsLayout()) {
+		int rotation = RotationUtils.getRotation(mContext);
+                if (rotation == RotationUtils.ROTATION_SEASCAPE) {
+                    if (useGridLayout()) {
+                        return com.android.systemui.R.layout.global_actions_grid_seascape;
+                    } else {
+                        return com.android.systemui.R.layout.global_actions_column_seascape;
+                    }
+                } else {
+                    if (useGridLayout()) {
+                        return com.android.systemui.R.layout.global_actions_grid;
+                    } else {
+                        return com.android.systemui.R.layout.global_actions_column;
+                    }
+                }
+            }
             return com.android.systemui.R.layout.global_actions_grid_lite;
         }
 
@@ -2718,6 +2769,10 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             mGlobalActionsLayout.setRotationListener(this::onRotate);
             mGlobalActionsLayout.setAdapter(mAdapter);
             mContainer = findViewById(com.android.systemui.R.id.global_actions_container);
+	    // Some legacy dialog layouts don't have the outer container
+            if (mContainer == null) {
+                mContainer = mGlobalActionsLayout;
+            }
             mContainer.setOnTouchListener((v, event) -> {
                 mGestureDetector.onTouchEvent(event);
                 return v.onTouchEvent(event);
@@ -2934,5 +2989,13 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         public void onRotate(int from, int to) {
             refreshDialog();
         }
+    }
+
+    protected boolean shouldUseControlsLayout() {
+        return org.eu.droid_ng.providers.NgSettings.Secure.getInt(mContext.getContentResolver(), org.eu.droid_ng.providers.NgSettings.Secure.POWER_MENU_TYPE, 0) == 0;
+    }
+
+    protected boolean useGridLayout() {
+        return org.eu.droid_ng.providers.NgSettings.Secure.getInt(mContext.getContentResolver(), org.eu.droid_ng.providers.NgSettings.Secure.POWER_MENU_TYPE, 0) == 3;
     }
 }

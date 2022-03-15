@@ -116,7 +116,10 @@ class FooterActionsController @Inject constructor(
             }
         } else if (v === powerMenuLite) {
             uiEventLogger.log(GlobalActionsDialogLite.GlobalActionsEvent.GA_OPEN_QS)
-            globalActionsDialog.showOrHideDialog(false, true, v)
+	    if (org.eu.droid_ng.providers.NgSettings.Secure.getInt(context.getContentResolver(), org.eu.droid_ng.providers.NgSettings.Secure.POWER_MENU_TYPE, 0) == 0)
+	    globalActionsDialog.showOrHideDialog(false, true, v)
+	    else
+	    context.sendBroadcast(Intent("android.intent.action.POWER_MENU"))
         }
     }
 

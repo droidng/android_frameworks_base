@@ -64,7 +64,7 @@ class GlobalActions implements GlobalActionsProvider.GlobalActionsListener {
         mKeyguardShowing = keyguardShowing;
         mDeviceProvisioned = deviceProvisioned;
         mShowing = true;
-        if (mGlobalActionsAvailable) {
+        if (mGlobalActionsAvailable && org.eu.droid_ng.providers.NgSettings.Secure.getInt(mContext.getContentResolver(), org.eu.droid_ng.providers.NgSettings.Secure.POWER_MENU_TYPE, 0) != 4) {
             mHandler.postDelayed(mShowTimeout, 5000);
             mGlobalActionsProvider.showGlobalActions();
         } else {

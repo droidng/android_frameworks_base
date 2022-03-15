@@ -19,6 +19,7 @@ package com.android.systemui.qs
 import android.os.UserManager
 import com.android.internal.logging.MetricsLogger
 import com.android.internal.logging.UiEventLogger
+import com.android.systemui.globalactions.GlobalActionsDialog
 import com.android.systemui.globalactions.GlobalActionsDialogLite
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
