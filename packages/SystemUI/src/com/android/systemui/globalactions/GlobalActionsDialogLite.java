@@ -492,7 +492,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             mDialog.dismiss();
             mDialog = null;
         } else {
-            handleShow(view);
+            handleShow(shouldUseControlsLayout() ? view : null);
         }
     }
 

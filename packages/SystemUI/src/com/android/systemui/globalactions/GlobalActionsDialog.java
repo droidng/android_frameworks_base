@@ -365,13 +365,13 @@ public class GlobalActionsDialog extends GlobalActionsDialogLite
     public void showOrHideDialog(boolean keyguardShowing, boolean isDeviceProvisioned,
             @Nullable View v, GlobalActionsPanelPlugin walletPlugin) {
         mWalletPlugin = walletPlugin;
-        super.showOrHideDialog(keyguardShowing, isDeviceProvisioned, v);
+        super.showOrHideDialog(keyguardShowing, isDeviceProvisioned, null);
     }
 
     @Override
     protected void handleShow(View v) {
         seedFavorites();
-        super.handleShow(v);
+        super.handleShow(null);
     }
 
     /**
@@ -617,9 +617,6 @@ public class GlobalActionsDialog extends GlobalActionsDialogLite
 	@Override
         public void show() {
 	    super.show();
-            mNotificationShadeWindowController.setRequestTopUi(true, TAG);
-            mSysUiState.setFlag(SYSUI_STATE_GLOBAL_ACTIONS_SHOWING, true)
-                    .commitUpdate(mContext.getDisplayId());
             if (mControlsUiController != null) {
                 mControlsUiController.show(mControlsView, this::dismissForControlsActivity,
                         null /* activityContext */);
@@ -735,5 +732,10 @@ public class GlobalActionsDialog extends GlobalActionsDialogLite
     private void onPowerMenuLockScreenSettingsChanged() {
         mShowLockScreenCardsAndControls = mSecureSettings.getInt(
                 Settings.Secure.POWER_MENU_LOCKED_SHOW_CONTENT, 0) != 0;
+    }
+
+    @Override
+    protected boolean shouldUseControlsLayout() {
+	return true;
     }
 }
