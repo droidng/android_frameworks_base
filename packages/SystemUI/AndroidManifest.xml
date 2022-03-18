@@ -416,6 +416,15 @@
                   android:exported="true">
         </activity>
 
+	<activity android:name=".tuner.LockScreenActivity"
+                  android:enabled="true"
+                  android:icon="@drawable/tuner"
+                  android:theme="@style/Theme.SubSettingsBase"
+                  android:label="@*org.eu.droid_ng.platform:string/lockscreen_shortcuts"
+                  android:process=":tuner"
+                  android:exported="true">
+        </activity>
+
         <activity
             android:name="com.android.wm.shell.legacysplitscreen.ForcedResizableInfoActivity"
             android:theme="@style/ForcedResizableTheme"
