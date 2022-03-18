@@ -15,6 +15,7 @@
 package com.android.server.policy;
 
 import android.content.Context;
+import android.provider.Settings;
 import android.os.Handler;
 import android.util.Slog;
 
@@ -64,7 +65,7 @@ class GlobalActions implements GlobalActionsProvider.GlobalActionsListener {
         mKeyguardShowing = keyguardShowing;
         mDeviceProvisioned = deviceProvisioned;
         mShowing = true;
-        if (mGlobalActionsAvailable) {
+        if (mGlobalActionsAvailable || Settings.Secure.getInt(mContext.getContentResolver(), Settings.Secure.POWER_MENU_TYPE, 0) == 4) {
             mHandler.postDelayed(mShowTimeout, 5000);
             mGlobalActionsProvider.showGlobalActions();
         } else {
@@ -90,7 +91,7 @@ class GlobalActions implements GlobalActionsProvider.GlobalActionsListener {
     @Override
     public void onGlobalActionsAvailableChanged(boolean available) {
         if (DEBUG) Slog.d(TAG, "onGlobalActionsAvailableChanged " + available);
-        mGlobalActionsAvailable = available;
+        mGlobalActionsAvailable = available || Settings.Secure.getInt(mContext.getContentResolver(), Settings.Secure.POWER_MENU_TYPE, 0) == 4;
         if (mShowing && !mGlobalActionsAvailable) {
             // Global actions provider died but we need to be showing global actions still, show the
             // legacy global acrions provider.

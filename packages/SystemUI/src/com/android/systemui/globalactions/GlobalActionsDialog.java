@@ -432,19 +432,19 @@ public class GlobalActionsDialog extends GlobalActionsDialogLite
     }
 
     @Override
-    protected int getEmergencyTextColor(Context context) {
+    protected int getEmergencyTextColor(Context context, boolean dummy) {
         return context.getResources().getColor(
                 com.android.systemui.R.color.global_actions_emergency_text);
     }
 
     @Override
-    protected int getEmergencyIconColor(Context context) {
+    protected int getEmergencyIconColor(Context context, boolean dummy) {
         return getContext().getResources().getColor(
                 com.android.systemui.R.color.global_actions_emergency_text);
     }
 
     @Override
-    protected int getEmergencyBackgroundColor(Context context) {
+    protected int getEmergencyBackgroundColor(Context context, boolean dummy) {
         return getContext().getResources().getColor(
                 com.android.systemui.R.color.global_actions_emergency_background);
     }
