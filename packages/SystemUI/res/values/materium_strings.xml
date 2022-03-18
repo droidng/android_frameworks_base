@@ -47,6 +47,7 @@
     <string name="adjust_button_width">Adjust button width</string>
 
     <!-- Lockscreen icons -->
+    <string name="lockscreen_shortcuts">Lockscreen shortcuts</string>
     <string name="lockscreen_default">Default</string>
     <string name="lockscreen_hidden">None</string>
 
