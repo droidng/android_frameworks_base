@@ -1,10 +1,13 @@
 package com.android.keyguard;
 
+import static com.android.systemui.shared.recents.utilities.Utilities.isTablet;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.util.AttributeSet;
@@ -91,6 +94,18 @@ public class KeyguardClockSwitch extends RelativeLayout {
 
     public KeyguardClockSwitch(Context context, AttributeSet attrs) {
         super(context, attrs);
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        if (mDisplayedClockSize != null) {
+            boolean landscape = newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE;
+            boolean useLargeClock = mDisplayedClockSize == LARGE &&
+                    (!landscape || isTablet(mContext));
+            animateClockChange(useLargeClock);
+        }
     }
 
     /**
@@ -277,11 +292,14 @@ public class KeyguardClockSwitch extends RelativeLayout {
         if (mDisplayedClockSize != null && clockSize == mDisplayedClockSize) {
             return false;
         }
+        boolean landscape = getResources().getConfiguration().orientation
+                == Configuration.ORIENTATION_LANDSCAPE;
+        boolean useLargeClock = clockSize == LARGE && (!landscape || isTablet(mContext));
 
         // let's make sure clock is changed only after all views were laid out so we can
         // translate them properly
         if (mChildrenAreLaidOut) {
-            animateClockChange(clockSize == LARGE);
+            animateClockChange(useLargeClock);
         }
 
         mDisplayedClockSize = clockSize;
