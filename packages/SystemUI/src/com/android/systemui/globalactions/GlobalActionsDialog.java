@@ -611,7 +611,7 @@ public class GlobalActionsDialog extends GlobalActionsDialogLite
                     com.android.systemui.R.id.global_actions_lock_message_container);
             mLockMessage = requireViewById(com.android.systemui.R.id.global_actions_lock_message);
             initializeWalletView();
-            getWindow().setBackgroundDrawable(mBackgroundDrawable);
+	    getWindow().setBackgroundDrawable(mBackgroundDrawable);
         }
 
 	@Override
@@ -621,6 +621,36 @@ public class GlobalActionsDialog extends GlobalActionsDialogLite
                 mControlsUiController.show(mControlsView, this::dismissForControlsActivity,
                         null /* activityContext */);
             }
+
+	    ViewGroup root = (ViewGroup) mGlobalActionsLayout.getRootView();
+            root.setOnApplyWindowInsetsListener((v, windowInsets) -> {
+                root.setPadding(windowInsets.getStableInsetLeft(),
+                        windowInsets.getStableInsetTop(),
+                        windowInsets.getStableInsetRight(),
+                        windowInsets.getStableInsetBottom());
+                return WindowInsets.CONSUMED;
+            });
+
+            mBackgroundDrawable.setAlpha(0);
+            float xOffset = mGlobalActionsLayout.getAnimationOffsetX();
+            ObjectAnimator alphaAnimator =
+                    ObjectAnimator.ofFloat(mContainer, "alpha", 0f, 1f);
+            alphaAnimator.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
+            alphaAnimator.setDuration(183);
+            alphaAnimator.addUpdateListener((animation) -> {
+                float animatedValue = animation.getAnimatedFraction();
+                int alpha = (int) (animatedValue * mScrimAlpha * 255);
+                mBackgroundDrawable.setAlpha(alpha);
+            });
+
+            ObjectAnimator xAnimator =
+                    ObjectAnimator.ofFloat(mContainer, "translationX", xOffset, 0f);
+            xAnimator.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
+            xAnimator.setDuration(350);
+
+            AnimatorSet animatorSet = new AnimatorSet();
+            animatorSet.playTogether(alphaAnimator, xAnimator);
+            animatorSet.start();
         }
 
         @Override
@@ -628,13 +658,45 @@ public class GlobalActionsDialog extends GlobalActionsDialogLite
             dismissWallet();
             if (mControlsUiController != null) mControlsUiController.closeDialogs(false);
             if (mControlsUiController != null) mControlsUiController.hide();
-            resetOrientation();
-            super.dismiss();
+	    mContainer.setTranslationX(0);
+            ObjectAnimator alphaAnimator =
+                    ObjectAnimator.ofFloat(mContainer, "alpha", 1f, 0f);
+            alphaAnimator.setInterpolator(Interpolators.FAST_OUT_LINEAR_IN);
+            alphaAnimator.setDuration(233);
+            alphaAnimator.addUpdateListener((animation) -> {
+                float animatedValue = 1f - animation.getAnimatedFraction();
+                int alpha = (int) (animatedValue * mScrimAlpha * 255);
+                mBackgroundDrawable.setAlpha(alpha);
+            });
+
+            float xOffset = mGlobalActionsLayout.getAnimationOffsetX();
+            ObjectAnimator xAnimator =
+                    ObjectAnimator.ofFloat(mContainer, "translationX", 0f, xOffset);
+            xAnimator.setInterpolator(Interpolators.FAST_OUT_LINEAR_IN);
+            xAnimator.setDuration(350);
+
+            AnimatorSet animatorSet = new AnimatorSet();
+            animatorSet.playTogether(alphaAnimator, xAnimator);
+            animatorSet.addListener(new AnimatorListenerAdapter() {
+                public void onAnimationEnd(Animator animation) {
+                    completeDismiss();
+                }
+            });
+
+            animatorSet.start();
         }
 
+	void completeDismiss() {
+            resetOrientation();
+            super.dismiss();
+	}
+
 	private void dismissForControlsActivity() {
+            dismissWallet();
+            if (mControlsUiController != null) mControlsUiController.closeDialogs(false);
+            if (mControlsUiController != null) mControlsUiController.hide();
             ViewGroup root = (ViewGroup) mGlobalActionsLayout.getParent();
-            ControlsAnimations.exitAnimation(root, this::dismiss).start();
+            ControlsAnimations.exitAnimation(root, this::completeDismiss).start();
 	}
 
         private void dismissWallet() {
