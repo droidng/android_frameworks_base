@@ -8106,6 +8106,19 @@ public class PackageManagerService extends IPackageManager.Stub
             enableComponents(mContext.getResources().getStringArray(
                     com.android.internal.R.array.config_forceEnabledComponents), true);
 
+            // Disable components marked for disabling at build-time
+            enableComponents(mContext.getResources().getStringArray(
+                     org.lineageos.platform.internal.R.array.config_deviceDisabledComponents),
+                     false);
+            enableComponents(mContext.getResources().getStringArray(
+                    org.lineageos.platform.internal.R.array.config_globallyDisabledComponents),
+                    false);
+
+            // Enable components marked for forced-enable at build-time
+            enableComponents(mContext.getResources().getStringArray(
+                    org.lineageos.platform.internal.R.array.config_forceEnabledComponents),
+                    true);
+
             // If this is first boot after an OTA, and a normal boot, then
             // we need to clear code cache directories.
             // Note that we do *not* clear the application profiles. These remain valid
