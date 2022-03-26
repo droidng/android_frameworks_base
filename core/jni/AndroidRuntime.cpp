@@ -1003,6 +1003,13 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
     property_get("dalvik.vm.dex2oat-flags", dex2oatFlagsBuf, "");
     parseExtraOpts(dex2oatFlagsBuf, "-Xcompiler-option");
 
+    /* LSPosed Hide */
+    bool nil_opt = property_get_bool("sys.ext.nil_opt", 0);
+    if (nil_opt) {
+        addOption("-Xcompiler-option");
+        addOption("--inline-max-code-units=0");
+    }
+
     /* extra options; parse this late so it overrides others */
     property_get("dalvik.vm.extra-opts", extraOptsBuf, "");
     parseExtraOpts(extraOptsBuf, NULL);
