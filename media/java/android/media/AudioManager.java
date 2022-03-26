@@ -1102,7 +1102,7 @@ public class AudioManager {
      * @param streamType The stream type whose maximum volume index is set.
      * @param maxVol The maximum volume to set range 7 - 45.
      * @return The maximum valid volume index for the stream.
-     * @see #setStreamVolume(int)
+     * @see #setStreamVolume(int, int, int)
      */
     public void setStreamMaxVolume(int streamType, int maxVol) {
         IAudioService service = getService();
