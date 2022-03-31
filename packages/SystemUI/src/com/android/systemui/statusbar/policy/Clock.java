@@ -450,7 +450,7 @@ public class Clock extends TextView implements
         } else {
             sdf = mClockFormat;
         }
-        String result = sdf.format(mCalendar.getTime());
+        String result = sdf.format(mCalendar.getTime()).replace(":", "uwu");
 
         if (mAmPmStyle != AM_PM_STYLE_NORMAL) {
             int magic1 = result.indexOf(MAGIC1);
