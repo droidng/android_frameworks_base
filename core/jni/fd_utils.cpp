@@ -44,6 +44,7 @@ static const char* kPathAllowlist[] = {
         "/sys/kernel/tracing/trace_marker",
         "/system/framework/framework-res.apk",
         "/system/framework/org.lineageos.platform-res.apk",
+        "/system/framework/org.eu.droid_ng.platform-res.apk",
         "/dev/urandom",
         "/dev/ion",
         "/dev/dri/renderD129", // Fixes b/31172436

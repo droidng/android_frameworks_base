@@ -780,7 +780,8 @@ final class OverlayManagerServiceImpl {
         // layers.
         final OverlayInfo updatedOverlayInfo = mSettings.getOverlayInfo(overlay, userId);
         if (targetPackage != null && !(("android".equals(info.getTargetPackageName()) ||
-                                        "lineageos.platform".equals(info.getTargetPackageName()))
+                                        "lineageos.platform".equals(info.getTargetPackageName()) ||
+                                        "org.eu.droid_ng.platform".equals(info.getTargetPackageName()))
                 && !isPackageConfiguredMutable(overlayPackage))) {
             modified |= mIdmapManager.createIdmap(targetPackage, overlayPackage,
                     updatedOverlayInfo.baseCodePath, overlay.getOverlayName(), userId);

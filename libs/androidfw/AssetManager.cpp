@@ -63,6 +63,7 @@ static const char* kAssetsRoot = "assets";
 static const char* kAppZipName = NULL; //"classes.jar";
 static const char* kSystemAssets = "framework/framework-res.apk";
 static const char* kLineageAssets = "framework/org.lineageos.platform-res.apk";
+static const char* kNgAssets = "framework/org.eu.droid_ng.platform-res.apk";
 static const char* kResourceCache = "resource-cache";
 
 static const char* kExcludeExtension = ".EXCLUDE";
@@ -376,6 +377,11 @@ bool AssetManager::addDefaultAssets()
     {
        String8 path(root);
        path.appendPath(kLineageAssets);
+       success &= addAssetPath(path, NULL, false /* appAsLib */, true /* isSystemAsset */);
+    }
+    {
+       String8 path(root);
+       path.appendPath(kNgAssets);
        success &= addAssetPath(path, NULL, false /* appAsLib */, true /* isSystemAsset */);
     }
 

@@ -124,6 +124,7 @@ java_library_static {
         "framework-tethering.stubs.module_lib",
         "service-permission.stubs.system_server",
         "org.lineageos.platform.internal",
+        "org.eu.droid_ng.platform.internal",
     ],
 
     required: [

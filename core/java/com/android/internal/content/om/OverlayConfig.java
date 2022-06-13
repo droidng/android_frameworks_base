@@ -380,6 +380,7 @@ public class OverlayConfig {
         for (Map.Entry<String, String> target : new HashMap<String, String>() {{
                 put("/system/framework/framework-res.apk", "android");
                 put("/system/framework/org.lineageos.platform-res.apk", "lineageos.platform");
+                put("/system/framework/org.eu.droid_ng.platform-res.apk", "org.eu.droid_ng.platform");
         }}.entrySet()) {
             final String targetPath = target.getKey();
             final String targetPackageName = target.getValue();

@@ -2536,7 +2536,26 @@ public final class SystemServer implements Dumpable {
         // Lineage Services
         String externalServer = context.getResources().getString(
                 org.lineageos.platform.internal.R.string.config_externalSystemServer);
-        final Class<?> serverClazz;
+        Class<?> serverClazz;
+        try {
+            serverClazz = Class.forName(externalServer);
+            final Constructor<?> constructor = serverClazz.getDeclaredConstructor(Context.class);
+            constructor.setAccessible(true);
+            final Object baseObject = constructor.newInstance(mSystemContext);
+            final Method method = baseObject.getClass().getDeclaredMethod("run");
+            method.setAccessible(true);
+            method.invoke(baseObject);
+        } catch (ClassNotFoundException
+                | IllegalAccessException
+                | InvocationTargetException
+                | InstantiationException
+                | NoSuchMethodException e) {
+            reportWtf("Making " + externalServer + " ready", e);
+        }
+
+        // NG Services
+        externalServer = context.getResources().getString(
+                org.eu.droid_ng.platform.internal.R.string.config_externalSystemServer);
         try {
             serverClazz = Class.forName(externalServer);
             final Constructor<?> constructor = serverClazz.getDeclaredConstructor(Context.class);

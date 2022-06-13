@@ -131,6 +131,7 @@ java_library {
         "android.hidl.manager-V1.0-java",
         "framework-tethering.stubs.module_lib",
         "org.lineageos.platform.internal",
+        "org.eu.droid_ng.platform.internal",
     ],
 
     // Uncomment to enable output of certain warnings (deprecated, unchecked)

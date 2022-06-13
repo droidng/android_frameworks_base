@@ -61,6 +61,7 @@ namespace {
 
 constexpr const char* kFrameworkPath = "/system/framework/framework-res.apk";
 constexpr const char* kLineagePath = "/system/framework/org.lineageos.platform-res.apk";
+constexpr const char* kNgPath = "/system/framework/org.eu.droid_ng.platform-res.apk";
 
 Status ok() {
   return Status::ok();
@@ -229,6 +230,17 @@ idmap2::Result<Idmap2Service::TargetResourceContainerPtr> Idmap2Service::GetTarg
       lineage_apk_cache_ = std::move(*target);
     }
     return {lineage_apk_cache_.get()};
+  }
+  if (target_path == kNgPath) {
+    if (ng_apk_cache_ == nullptr) {
+      // Initialize the ng APK cache.
+      auto target = TargetResourceContainer::FromPath(target_path);
+      if (!target) {
+        return target.GetError();
+      }
+      ng_apk_cache_ = std::move(*target);
+    }
+    return {ng_apk_cache_.get()};
   }
 
   auto target = TargetResourceContainer::FromPath(target_path);
