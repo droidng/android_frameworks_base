@@ -21,6 +21,7 @@
         package="com.android.systemui"
         android:sharedUserId="android.uid.systemui"
         xmlns:tools="http://schemas.android.com/tools"
+        tools:ignore="ProtectedPermissions"
         coreApp="true">
 
     <!-- Using OpenGL ES 2.0 -->
