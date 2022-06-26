@@ -306,6 +306,10 @@ public class QSFactoryImpl implements QSFactory {
     @Override
     public QSTileView createTileView(Context context, QSTile tile, boolean collapsedView) {
         QSIconView icon = tile.createTileView(context);
+        boolean usePrc = org.eu.droid_ng.providers.NgSettings.System.getInt(context.getContentResolver(), org.eu.droid_ng.providers.NgSettings.System.PRC_QS, 1) != 0;
+        if (usePrc) {
+            return new QSTileViewImplPrc(context, icon, collapsedView);
+        }
         return new QSTileViewImpl(context, icon, collapsedView);
     }
 }

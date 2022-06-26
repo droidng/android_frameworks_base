@@ -34,6 +34,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
+import android.widget.TextView;
 
 import androidx.annotation.VisibleForTesting;
 
@@ -193,8 +195,9 @@ public class QSPanel extends LinearLayout implements Tunable {
     /** */
     public QSTileLayout getOrCreateTileLayout() {
         if (mTileLayout == null) {
+            boolean useVerticalScroll = org.eu.droid_ng.providers.NgSettings.System.getInt(mContext.getContentResolver(), org.eu.droid_ng.providers.NgSettings.System.QS_VERTICAL_SCROLL, 0) == 1;
             mTileLayout = (QSTileLayout) LayoutInflater.from(mContext)
-                    .inflate(R.layout.qs_paged_tile_layout, this, false);
+                    .inflate(useVerticalScroll ? R.layout.prc_qs_tile_layout : R.layout.qs_paged_tile_layout, this, false);
             mTileLayout.setSquishinessFraction(mSquishinessFraction);
         }
         return mTileLayout;
@@ -423,11 +426,11 @@ public class QSPanel extends LinearLayout implements Tunable {
         return true;
     }
 
-    private void switchAllContentToParent(ViewGroup parent, QSTileLayout newLayout) {
+    private void switchAllContentToParent(ViewGroup parent, View newLayout) {
         int index = parent == this ? mMovableContentStartIndex : 0;
 
         // Let's first move the tileLayout to the new parent, since that should come first.
-        switchToParent((View) newLayout, parent, index);
+        switchToParent(newLayout, parent, index);
         index++;
 
         if (mFooter != null) {
@@ -737,10 +740,12 @@ public class QSPanel extends LinearLayout implements Tunable {
     }
 
     void setUsingHorizontalLayout(boolean horizontal, ViewGroup mediaHostView, boolean force) {
+        boolean useVerticalScroll = org.eu.droid_ng.providers.NgSettings.System.getInt(mContext.getContentResolver(), org.eu.droid_ng.providers.NgSettings.System.QS_VERTICAL_SCROLL, 1) == 1;
+
         if (horizontal != mUsingHorizontalLayout || force) {
             mUsingHorizontalLayout = horizontal;
             ViewGroup newParent = horizontal ? mHorizontalContentContainer : this;
-            switchAllContentToParent(newParent, mTileLayout);
+            switchAllContentToParent(newParent, (View) mTileLayout);
             reAttachMediaHost(mediaHostView, horizontal);
             if (needsDynamicRowsAndColumns()) {
                 mTileLayout.setMinRows(horizontal ? 2 : 1);

@@ -9,13 +9,18 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.core.widget.NestedScrollView;
+
 import com.android.internal.logging.UiEventLogger;
+import com.android.internal.widget.RemeasuringLinearLayout;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSPanel.QSTileLayout;
 import com.android.systemui.qs.QSPanelControllerBase.TileRecord;
 import com.android.systemui.qs.tileimpl.HeightOverrideable;
+import com.android.systemui.qs.tileimpl.QSTileViewImplPrc;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 public class TileLayout extends ViewGroup implements QSTileLayout {
 
@@ -44,6 +49,8 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     protected int mResourceColumns;
     private float mSquishinessFraction = 1f;
     private int mLastTileBottom;
+
+    private boolean isFirst;
 
     public TileLayout(Context context) {
         this(context, null);
@@ -85,6 +92,11 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         return false;
     }
 
+    public void setIsFirst(boolean isFirst) {
+        this.isFirst = isFirst;
+    }
+
+
     @Override
     public boolean setMaxColumns(int maxColumns) {
         mMaxColumns = maxColumns;
@@ -118,7 +130,8 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
 
     public boolean updateResources() {
         final Resources res = mContext.getResources();
-        mResourceColumns = Math.max(1, res.getInteger(R.integer.quick_settings_num_columns));
+        boolean usePrc = org.eu.droid_ng.providers.NgSettings.System.getInt(mContext.getContentResolver(), org.eu.droid_ng.providers.NgSettings.System.PRC_QS, 1) != 0;
+        mResourceColumns = Math.max(1, res.getInteger(R.integer.quick_settings_num_columns) * (usePrc ? 2 : 1));
         updateColumns();
         mMaxCellHeight = mContext.getResources().getDimensionPixelSize(mCellHeightResId);
         mCellMarginHorizontal = res.getDimensionPixelSize(R.dimen.qs_tile_margin_horizontal);
@@ -219,6 +232,8 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         int column = 0;
         mLastTileBottom = 0;
 
+        int prcType = org.eu.droid_ng.providers.NgSettings.System.getInt(mContext.getContentResolver(), org.eu.droid_ng.providers.NgSettings.System.PRC_QS, 1);
+
         // Layout each QS tile.
         final int tilesToLayout = Math.min(numRecords, mRows * mColumns);
         for (int i = 0; i < tilesToLayout; i++, column++) {
@@ -229,6 +244,12 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
             }
 
             final TileRecord record = mRecords.get(i);
+
+            if (record.tileView instanceof QSTileViewImplPrc) {
+                QSTileViewImplPrc tileViewImplPrc = (QSTileViewImplPrc) record.tileView;
+                tileViewImplPrc.setIsPrc2(prcType != 2 && ((row == 0 && isFirst) || prcType == 3));
+            }
+
             final int top = getRowTop(row);
             final int left = getColumnStart(isRtl ? mColumns - column - 1 : column);
             final int right = left + mCellWidth;
@@ -294,4 +315,7 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
             }
         }
     }
+
+    //stub
+    public void startTileReveal(Set<String> tileSpecs, final Runnable postAnimation) {}
 }

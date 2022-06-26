@@ -261,6 +261,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     protected void onFinishInflate() {
         super.onFinishInflate();
         mPages.add(createTileLayout());
+        mPages.get(0).setIsFirst(true);
         mAdapter.notifyDataSetChanged();
     }
 

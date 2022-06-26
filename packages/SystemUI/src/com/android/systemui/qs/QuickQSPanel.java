@@ -175,6 +175,7 @@ public class QuickQSPanel extends QSPanel {
 
         QQSSideLabelTileLayout(Context context) {
             super(context, null);
+            setIsFirst(true);
             setClipChildren(false);
             setClipToPadding(false);
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT,

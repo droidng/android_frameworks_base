@@ -324,8 +324,8 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
 
                     // Icons
                     translateContent(
-                            quickTileView.getIcon(),
-                            tileView.getIcon(),
+                            quickTileView.getIconWithBackground(),
+                            tileView.getIconWithBackground(),
                             view,
                             xOffset,
                             yOffset,

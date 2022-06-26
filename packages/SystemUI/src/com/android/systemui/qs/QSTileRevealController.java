@@ -23,7 +23,7 @@ public class QSTileRevealController {
 
     private final Context mContext;
     private final QSPanelController mQSPanelController;
-    private final PagedTileLayout mPagedTileLayout;
+    private final TileLayout mPagedTileLayout;
     private final QSCustomizerController mQsCustomizerController;
     private final ArraySet<String> mTilesToReveal = new ArraySet<>();
     private final Handler mHandler = new Handler();
@@ -40,7 +40,7 @@ public class QSTileRevealController {
         }
     };
     QSTileRevealController(Context context, QSPanelController qsPanelController,
-            PagedTileLayout pagedTileLayout, QSCustomizerController qsCustomizerController) {
+            TileLayout pagedTileLayout, QSCustomizerController qsCustomizerController) {
         mContext = context;
         mQSPanelController = qsPanelController;
         mPagedTileLayout = pagedTileLayout;
@@ -94,7 +94,7 @@ public class QSTileRevealController {
         }
 
         QSTileRevealController create(QSPanelController qsPanelController,
-                PagedTileLayout pagedTileLayout) {
+                TileLayout pagedTileLayout) {
             return new QSTileRevealController(mContext, qsPanelController, pagedTileLayout,
                     mQsCustomizerController);
         }
