@@ -1,3 +1,6 @@
 -keepclassmembers class lineageos.providers.LineageSettings {
     public <fields>;
 }
+-keepclassmembers class org.eu.droid_ng.providers.NgSettings {
+    public <fields>;
+}

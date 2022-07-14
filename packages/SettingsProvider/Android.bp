@@ -33,6 +33,7 @@ android_app {
     static_libs: [
         "junit",
         "org.lineageos.platform.internal",
+        "org.eu.droid_ng.platform.internal",
         "SettingsLibDisplayDensityUtils",
     ],
     optimize: {
