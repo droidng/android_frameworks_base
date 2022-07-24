@@ -12009,6 +12009,52 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private void scanDirLI(File scanDir, int parseFlags, int scanFlags, long currentTime,
             PackageParser2 packageParser, ExecutorService executorService) {
+        /* gms feature start */
+        // microg: prefix Phonesky (for IAP), GmsCore with micro, name overlay microOverlay
+        String[][] gmsFeatureMeta = new String[][] {
+          /* vanilla - 0 */
+          new String[] {
+                  "GmsOverlay","GmsSettingsProviderOverlay","GoogleCalendarSyncAdapter",
+                  "GoogleContactsSyncAdapter","PrebuiltExchange3Google","AndroidAutoStub","GooglePartnerSetup",
+                  "GoogleFeedback","GoogleServicesFramework","com.google.android.dialer.support","GoogleRestore",
+                  "GmsCore","Phonesky","MarkupGoogle","SpeechServicesByGoogle","talkback","Velvet","SetupWizard",
+                  "microPhonesky","GsfProxy","microOverlay","FakeStore","microGmsCore"
+          },
+          /* microg - 1 */
+          new String[] {
+                  "GmsOverlay","GmsSettingsProviderOverlay","GoogleCalendarSyncAdapter",
+                  "GoogleContactsSyncAdapter","PrebuiltExchange3Google","AndroidAutoStub","GooglePartnerSetup",
+                  "GoogleFeedback","GoogleServicesFramework","com.google.android.dialer.support","GoogleRestore",
+                  "GmsCore","Phonesky","MarkupGoogle","SpeechServicesByGoogle","talkback","Velvet","SetupWizard",
+                  "microPhonesky"
+          },
+          /* gapps - 2 */
+          new String[] {
+                   "microPhonesky","GsfProxy","microOverlay","FakeStore","microGmsCore","Provision"
+          },
+          /* microg level 2 (-FakeStore,+microPhonesky) - 3 */
+          new String[] {
+                  "GmsOverlay","GmsSettingsProviderOverlay","GoogleCalendarSyncAdapter",
+                  "GoogleContactsSyncAdapter","PrebuiltExchange3Google","AndroidAutoStub","GooglePartnerSetup",
+                  "GoogleFeedback","GoogleServicesFramework","com.google.android.dialer.support","GoogleRestore",
+                  "GmsCore","Phonesky","MarkupGoogle","SpeechServicesByGoogle","talkback","Velvet","SetupWizard",
+                  "FakeStore"
+          },
+          /* microg level 3 (-FakeStore,+microPhonesky,+GoogleCalendarSyncAdapter,+GoogleContactsSyncAdapter) - 4 */
+          new String[] {
+                  "GmsOverlay","GmsSettingsProviderOverlay","PrebuiltExchange3Google","AndroidAutoStub","GooglePartnerSetup",
+                  "GoogleFeedback","GoogleServicesFramework","com.google.android.dialer.support","GoogleRestore",
+                  "GmsCore","Phonesky","MarkupGoogle","SpeechServicesByGoogle","talkback","Velvet","SetupWizard",
+                  "FakeStore"
+          },
+        };
+        int gmsFeatureFlag = SystemProperties.getInt("persist.gms_feature", 0);
+        if (gmsFeatureMeta.length <= gmsFeatureFlag) {
+            Log.wtf("GmsFeature", "invalid persist.gms_feature value " + gmsFeatureFlag);
+            gmsFeatureFlag = 0;
+        }
+        List<String> blockedList = Arrays.asList(gmsFeatureMeta[gmsFeatureFlag]);
+        /* gms feature end */
         final File[] files = scanDir.listFiles();
         if (ArrayUtils.isEmpty(files)) {
             Log.d(TAG, "No files in app dir " + scanDir);
@@ -12027,7 +12073,10 @@ public class PackageManagerService extends IPackageManager.Stub
         int fileCount = 0;
         for (File file : files) {
             final boolean isPackage = (isApkFile(file) || file.isDirectory())
-                    && !PackageInstallerService.isStageName(file.getName());
+                    && !PackageInstallerService.isStageName(file.getName()) && !(
+                            /* gms feature */
+                            blockedList.contains(file.getName()) || blockedList.contains(file.getName().replace(".apk", "")) || blockedList.contains(file.getName().replace(".jar", ""))
+                    );
             if (!isPackage) {
                 // Ignore entries which are not packages
                 continue;
