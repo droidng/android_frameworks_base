@@ -221,7 +221,7 @@ public class PixelPropsUtils {
             }
             if (packageName.equals("com.google.android.gms")) {
                 final String processName = Application.getProcessName();
-                if (processName.equals("com.google.android.gms.unstable")) {
+                if (processName != null && processName.equals("com.google.android.gms.unstable")) {
                     sIsGms = true;
                 }
             }
