@@ -12018,7 +12018,7 @@ public class PackageManagerService extends IPackageManager.Stub
                   "GoogleContactsSyncAdapter","PrebuiltExchange3Google","AndroidAutoStub","GooglePartnerSetup",
                   "GoogleFeedback","GoogleServicesFramework","com.google.android.dialer.support","GoogleRestore",
                   "GmsCore","Phonesky","MarkupGoogle","SpeechServicesByGoogle","talkback","Velvet","SetupWizard",
-                  "microPhonesky","GsfProxy","microOverlay","FakeStore","microGmsCore"
+                  "microPhonesky","GsfProxy","FakeStore","microGmsCore"
           },
           /* microg - 1 */
           new String[] {
@@ -12030,7 +12030,7 @@ public class PackageManagerService extends IPackageManager.Stub
           },
           /* gapps - 2 */
           new String[] {
-                   "microPhonesky","GsfProxy","microOverlay","FakeStore","microGmsCore","Provision"
+                   "microPhonesky","GsfProxy","FakeStore","microGmsCore","Provision"
           },
           /* microg level 2 (-FakeStore,+microPhonesky) - 3 */
           new String[] {
