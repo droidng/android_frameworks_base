@@ -604,7 +604,7 @@ public class PackageParser {
      */
     public interface Callback {
         default NvAppProfileService getAppProfileService() {
-	    return null;
+            return null;
         }
         boolean hasFeature(String feature);
     }
