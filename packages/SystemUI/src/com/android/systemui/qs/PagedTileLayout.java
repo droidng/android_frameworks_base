@@ -29,7 +29,7 @@ import com.android.systemui.qs.QSPanelControllerBase.TileRecord;
 import java.util.ArrayList;
 import java.util.Set;
 
-public class PagedTileLayout extends ViewPager implements QSTileLayout {
+public class PagedTileLayout extends ViewPager implements QSTileLayout, Revealable {
 
     private static final boolean DEBUG = false;
     private static final String CURRENT_PAGE = "current_page";
@@ -493,6 +493,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         return currentPage.mRecords.size();
     }
 
+    @Override
     public void startTileReveal(Set<String> tileSpecs, final Runnable postAnimation) {
         if (tileSpecs.isEmpty() || mPages.size() < 2 || getScrollX() != 0 || !beginFakeDrag()) {
             // Do not start the reveal animation unless there are tiles to animate, multiple

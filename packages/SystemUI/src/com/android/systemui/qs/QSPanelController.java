@@ -154,14 +154,14 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
         switchTileLayout(true);
         mBrightnessMirrorHandler.onQsPanelAttached();
 
-        ((TileLayout) mView.getOrCreateTileLayout())
+        ((View) mView.getOrCreateTileLayout())
                 .setOnTouchListener(mTileLayoutTouchListener);
     }
 
     @Override
     protected QSTileRevealController createTileRevealController() {
         return mQsTileRevealControllerFactory.create(
-                this, (TileLayout) mView.getOrCreateTileLayout());
+                this, (Revealable) mView.getOrCreateTileLayout());
     }
 
     @Override

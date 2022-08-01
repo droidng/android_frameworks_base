@@ -22,7 +22,7 @@ import com.android.systemui.qs.tileimpl.QSTileViewImplPrc;
 import java.util.ArrayList;
 import java.util.Set;
 
-public class TileLayout extends ViewGroup implements QSTileLayout {
+public class TileLayout extends ViewGroup implements QSTileLayout, Revealable {
 
     public static final int NO_MAX_COLUMNS = 100;
 
@@ -316,6 +316,4 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         }
     }
 
-    //stub
-    public void startTileReveal(Set<String> tileSpecs, final Runnable postAnimation) {}
 }
