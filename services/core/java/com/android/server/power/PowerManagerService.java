@@ -63,6 +63,7 @@ import android.os.BatteryManager;
 import android.os.BatteryManagerInternal;
 import android.os.BatterySaverPolicyConfig;
 import android.os.Binder;
+import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IPowerManager;
@@ -132,7 +133,10 @@ import com.android.server.power.batterysaver.BatterySavingStats;
 
 import lineageos.providers.LineageSettings;
 
+import org.eu.droid_ng.providers.NgSettings;
+
 import java.io.FileDescriptor;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -755,6 +759,19 @@ public final class PowerManagerService extends SystemService
         }
     }
 
+    // Smart charging
+    private boolean mSmartChargingAvailable;
+    private boolean mSmartChargingEnabled;
+    private boolean mSmartChargingResetStats;
+    private boolean mPowerInputSuspended = false;
+    private int mSmartChargingLevel;
+    private int mSmartChargingResumeLevel;
+    private int mSmartChargingLevelDefaultConfig;
+    private int mSmartChargingResumeLevelDefaultConfig;
+    private static String mPowerInputSuspendSysfsNode;
+    private static String mPowerInputSuspendValue;
+    private static String mPowerInputResumeValue;
+
     /**
      * All times are in milliseconds. These constants are kept synchronized with the system
      * global Settings. Any access to this class or its fields should be done while
@@ -1314,6 +1331,19 @@ public final class PowerManagerService extends SystemService
                 LineageSettings.Secure.KEYBOARD_BRIGHTNESS),
                 false, mSettingsObserver, UserHandle.USER_ALL);
 
+        resolver.registerContentObserver(NgSettings.Global.getUriFor(
+                NgSettings.Global.SMART_CHARGING),
+                false, mSettingsObserver, UserHandle.USER_ALL);
+        resolver.registerContentObserver(NgSettings.Global.getUriFor(
+                NgSettings.Global.SMART_CHARGING_LEVEL),
+                false, mSettingsObserver, UserHandle.USER_ALL);
+        resolver.registerContentObserver(NgSettings.Global.getUriFor(
+                NgSettings.Global.SMART_CHARGING_RESUME_LEVEL),
+                false, mSettingsObserver, UserHandle.USER_ALL);
+        resolver.registerContentObserver(NgSettings.Global.getUriFor(
+                NgSettings.Global.SMART_CHARGING_RESET_STATS),
+                false, mSettingsObserver, UserHandle.USER_ALL);
+
         IVrManager vrManager = IVrManager.Stub.asInterface(getBinderService(Context.VR_SERVICE));
         if (vrManager != null) {
             try {
@@ -1398,6 +1428,21 @@ public final class PowerManagerService extends SystemService
             mProximityWakeLock = mContext.getSystemService(PowerManager.class)
                     .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "ProximityWakeLock");
         }
+        // Smart charging
+        mSmartChargingAvailable = resources.getBoolean(
+                org.eu.droid_ng.platform.internal.R.bool.config_smartChargingAvailable);
+        mSmartChargingLevelDefaultConfig = resources.getInteger(
+                org.eu.droid_ng.platform.internal.R.integer.config_smartChargingBatteryLevel);
+        mSmartChargingResumeLevelDefaultConfig = resources.getInteger(
+                org.eu.droid_ng.platform.internal.R.integer.config_smartChargingBatteryResumeLevel);
+        mPowerInputSuspendSysfsNode = resources.getString(
+                org.eu.droid_ng.platform.internal.R.string.config_smartChargingSysfsNode);
+        mPowerInputSuspendValue = resources.getString(
+                org.eu.droid_ng.platform.internal.R.string.config_smartChargingSuspendValue);
+        mPowerInputResumeValue = resources.getString(
+                org.eu.droid_ng.platform.internal.R.string.config_smartChargingResumeValue);
+        mSmartChargingResetStats = NgSettings.Global.getInt(mContext.getContentResolver(),
+                NgSettings.Global.SMART_CHARGING_RESET_STATS, 0) == 1;
     }
 
     private void updateSettingsLocked() {
@@ -1473,6 +1518,17 @@ public final class PowerManagerService extends SystemService
                 LineageSettings.Secure.KEYBOARD_BRIGHTNESS, mKeyboardBrightnessDefault,
                 UserHandle.USER_CURRENT);
 
+        mSmartChargingEnabled = NgSettings.Global.getInt(resolver,
+                NgSettings.Global.SMART_CHARGING, 0) == 1;
+        mSmartChargingLevel = NgSettings.Global.getInt(resolver,
+                NgSettings.Global.SMART_CHARGING_LEVEL,
+                mSmartChargingLevelDefaultConfig);
+        mSmartChargingResumeLevel = NgSettings.Global.getInt(resolver,
+                NgSettings.Global.SMART_CHARGING_RESUME_LEVEL,
+                mSmartChargingResumeLevelDefaultConfig);
+        mSmartChargingResetStats = NgSettings.Global.getInt(resolver,
+                NgSettings.Global.SMART_CHARGING_RESET_STATS, 0) == 1;
+
         mDirty |= DIRTY_SETTINGS;
     }
 
@@ -1480,6 +1536,7 @@ public final class PowerManagerService extends SystemService
     void handleSettingsChangedLocked() {
         updateSettingsLocked();
         updatePowerStateLocked();
+        updateSmartChargingStatus();
     }
 
     private void acquireWakeLockInternal(IBinder lock, int displayId, int flags, String tag,
@@ -2396,6 +2453,39 @@ public final class PowerManagerService extends SystemService
             }
 
             mBatterySaverStateMachine.setBatteryStatus(mIsPowered, mBatteryLevel, mBatteryLevelLow);
+            updateSmartChargingStatus();
+        }
+    }
+
+    private void updateSmartChargingStatus() {
+        if (!mSmartChargingAvailable) return;
+        if (mPowerInputSuspended && (mBatteryLevel <= mSmartChargingResumeLevel) ||
+            (mPowerInputSuspended && !mSmartChargingEnabled)) {
+            try {
+                FileUtils.stringToFile(mPowerInputSuspendSysfsNode, mPowerInputResumeValue);
+                mPowerInputSuspended = false;
+            } catch (IOException e) {
+                Slog.e(TAG, "failed to write to " + mPowerInputSuspendSysfsNode);
+            }
+            return;
+        }
+
+        if (mSmartChargingEnabled && !mPowerInputSuspended && (mBatteryLevel >= mSmartChargingLevel)) {
+            Slog.i(TAG, "Smart charging reset stats: " + mSmartChargingResetStats);
+            if (mSmartChargingResetStats) {
+                try {
+                     mBatteryStats.resetStatistics();
+                } catch (RemoteException e) {
+                         Slog.e(TAG, "failed to reset battery statistics");
+                }
+            }
+
+            try {
+                FileUtils.stringToFile(mPowerInputSuspendSysfsNode, mPowerInputSuspendValue);
+                mPowerInputSuspended = true;
+            } catch (IOException e) {
+                    Slog.e(TAG, "failed to write to " + mPowerInputSuspendSysfsNode);
+            }
         }
     }
 
