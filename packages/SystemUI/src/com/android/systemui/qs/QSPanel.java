@@ -741,6 +741,7 @@ public class QSPanel extends LinearLayout implements Tunable {
 
     void setUsingHorizontalLayout(boolean horizontal, ViewGroup mediaHostView, boolean force) {
         boolean useVerticalScroll = org.eu.droid_ng.providers.NgSettings.System.getInt(mContext.getContentResolver(), org.eu.droid_ng.providers.NgSettings.System.QS_VERTICAL_SCROLL, 1) == 1;
+        boolean usePrc = org.eu.droid_ng.providers.NgSettings.System.getInt(mContext.getContentResolver(), org.eu.droid_ng.providers.NgSettings.System.PRC_QS, 1) != 0;
 
         if (horizontal != mUsingHorizontalLayout || force) {
             mUsingHorizontalLayout = horizontal;
@@ -748,8 +749,8 @@ public class QSPanel extends LinearLayout implements Tunable {
             switchAllContentToParent(newParent, (View) mTileLayout);
             reAttachMediaHost(mediaHostView, horizontal);
             if (needsDynamicRowsAndColumns()) {
-                mTileLayout.setMinRows(horizontal ? 2 : 1);
-                mTileLayout.setMaxColumns(horizontal ? 2 : 4);
+                mTileLayout.setMinRows(horizontal && !usePrc ? 2 : 1);
+                mTileLayout.setMaxColumns(horizontal && !usePrc ? 2 : 4);
             }
             updateMargins(mediaHostView);
             if (mHorizontalLinearLayout == null) return;

@@ -86,13 +86,6 @@ open class QSTileViewImplPrc @JvmOverloads constructor(
         addView(l)
         createAndAddLabels()
         createAndAddSideView()
-
-        if (useprc2 && collapsed) {
-            val labelMargin = resources.getDimensionPixelSize(R.dimen.qs_label_container_margin)
-            (labelContainer.layoutParams as MarginLayoutParams).apply {
-                topMargin = labelMargin
-            }
-        }
     }
 
     override fun getIconWithBackground(): View {
@@ -121,14 +114,6 @@ open class QSTileViewImplPrc @JvmOverloads constructor(
             height = iconSize
             width = iconSize
         }
-
-        if (useprc2 && collapsed) {
-            val labelMargin = resources.getDimensionPixelSize(R.dimen.qs_label_container_margin)
-            (labelContainer.layoutParams as MarginLayoutParams).apply {
-                topMargin = labelMargin
-            }
-        }
-
     }
 
     override fun createAndAddLabels() {

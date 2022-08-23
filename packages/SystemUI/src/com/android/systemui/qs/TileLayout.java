@@ -247,7 +247,10 @@ public class TileLayout extends ViewGroup implements QSTileLayout, Revealable {
 
             if (record.tileView instanceof QSTileViewImplPrc) {
                 QSTileViewImplPrc tileViewImplPrc = (QSTileViewImplPrc) record.tileView;
-                tileViewImplPrc.setIsPrc2(prcType != 2 && ((row == 0 && isFirst) || prcType == 3));
+                // If type is NOT quadratic, either
+                // - we are first row on first page (with special logic for music player squishing)
+                // - type is rounded
+                tileViewImplPrc.setIsPrc2(prcType != 2 && ((((column) + (row * mColumns)) < mResourceColumns && isFirst) || prcType == 3));
             }
 
             final int top = getRowTop(row);
